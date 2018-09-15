@@ -1,32 +1,12 @@
-function Minefield(el, rows, cols, qty) {
-    this.el = el;
-    this.matrix = this.generateBombsMatrix(rows, cols, qty);
+function Minefield(elementId, rows, cols, qty) {
+    this.el = elementId || 'minefield';
     this.height = rows;
     this.width = cols;
-    this.neighboors = this.getBombsNeighboorsMatrix();
+    this.matrix = this.generateBombsMatrixEnhanced(rows, cols, qty);
 
     this.render();
     this.handleClickListener();
-    console.log(this.generateBombsMatrixEnhanced(rows, cols, qty));
 }
-
-Minefield.prototype.generateBombsMatrix = function(height, width, qty) {
-    const bombsMatrix = [];
-
-    for (let row = 0; row < height; row++) {
-        bombsMatrix[row] = [];
-        for (let col = 0; col < width; col++) {
-            bombsMatrix[row][col] = 0;
-        }
-    }
-
-    for (let count = 0; count < qty; count++) {
-        const row = Math.floor(Math.random() * height);
-        const col = Math.floor(Math.random() * width);
-        bombsMatrix[row][col] = 1;
-    }
-    return bombsMatrix;
-};
 
 Minefield.prototype.generateBombsMatrixEnhanced = function(height, width, qty) {
     const bombsMatrix = [];
@@ -36,6 +16,7 @@ Minefield.prototype.generateBombsMatrixEnhanced = function(height, width, qty) {
         for (let col = 0; col < width; col++) {
             bombsMatrix[row][col] = {
                 isBomb: false,
+                isRevealed: false,
                 neighboors: 0
             };
         }
@@ -73,39 +54,6 @@ Minefield.prototype.generateBombsMatrixEnhanced = function(height, width, qty) {
     return bombsMatrix;
 };
 
-Minefield.prototype.getBombsNeighboorsMatrix = function() {
-    const neighboors = [];
-    this.matrix.map((row, rIdx) => {
-        neighboors[rIdx] = [];
-        row.map((col, cIdx) => {
-            neighboors[rIdx][cIdx] = 0;
-        });
-    });
-
-    this.matrix.map((rArr, row) =>
-        rArr.map((cArr, col) => {
-            let sum = 0;
-            for (let x = -1; x <= 1; x++) {
-                for (let y = -1; y <= 1; y++) {
-                    const nX = row + x;
-                    const nY = col + y;
-                    if (
-                        nX > 0 &&
-                        nX < row.length &&
-                        nY > 0 &&
-                        nY < matrix.length &&
-                        !(x === 0 && y === 0)
-                    ) {
-                        sum += this.matrix[nX][nY];
-                    }
-                }
-            }
-            neighboors[row][col] = sum;
-        })
-    );
-    return neighboors;
-};
-
 Minefield.prototype.render = function(rows, col) {
     const wrapper = document.createElement('div');
     wrapper.className = 'wrapper';
@@ -130,18 +78,19 @@ Minefield.prototype.handleClickListener = function() {
 };
 
 Minefield.prototype.isBomb = function(row, col) {
-    return this.matrix[row][col];
+    return this.matrix[row][col].isBomb;
 };
 
-Minefield.prototype.review = function(row, col) {
+Minefield.prototype.reveal = function(row, col) {
     const cel = document.getElementById(`${row}-${col}`);
     if (!cel.classList.contains('open')) {
         cel.classList.add('open');
-        if (this.isBomb(row, col)) {
+        this.matrix[row][col].isRevealed = true;
+        if (this.matrix[row][col].isBomb) {
             cel.classList.add('bomb');
             this.openAll();
         } else {
-            cel.innerHTML = this.neighboors[row][col];
+            cel.innerHTML = this.matrix[row][col].neighboors;
         }
     }
 };
@@ -150,13 +99,14 @@ Minefield.prototype.openCel = function(e) {
     const id = e.target.id;
     const row = parseInt(id.split('')[0]);
     const col = parseInt(id.split('')[2]);
-    this.review(row, col);
+    this.reveal(row, col);
+    console.log(this.matrix);
 };
 
 Minefield.prototype.openAll = function() {
     for (let row = 0; row < this.height; row++) {
         for (let col = 0; col < this.width; col++) {
-            this.review(row, col);
+            this.reveal(row, col);
         }
     }
 };
