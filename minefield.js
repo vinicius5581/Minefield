@@ -7,6 +7,7 @@ function Minefield(el, rows, cols, qty) {
 
     this.render();
     this.handleClickListener();
+    console.log(this.generateBombsMatrixEnhanced(rows, cols, qty));
 }
 
 Minefield.prototype.generateBombsMatrix = function(height, width, qty) {
@@ -27,6 +28,51 @@ Minefield.prototype.generateBombsMatrix = function(height, width, qty) {
     return bombsMatrix;
 };
 
+Minefield.prototype.generateBombsMatrixEnhanced = function(height, width, qty) {
+    const bombsMatrix = [];
+
+    for (let row = 0; row < height; row++) {
+        bombsMatrix[row] = [];
+        for (let col = 0; col < width; col++) {
+            bombsMatrix[row][col] = {
+                isBomb: false,
+                neighboors: 0
+            };
+        }
+    }
+
+    for (let count = 0; count < qty; count++) {
+        const row = Math.floor(Math.random() * height);
+        const col = Math.floor(Math.random() * width);
+        bombsMatrix[row][col].isBomb = true;
+    }
+
+    bombsMatrix.forEach((rArr, row) =>
+        rArr.forEach((cArr, col) => {
+            let sum = 0;
+            for (let x = -1; x <= 1; x++) {
+                for (let y = -1; y <= 1; y++) {
+                    const nX = row + x;
+                    const nY = col + y;
+                    if (
+                        nX > 0 &&
+                        nX < rArr.length &&
+                        nY > 0 &&
+                        nY < bombsMatrix.length &&
+                        !(x === 0 && y === 0) &&
+                        bombsMatrix[nX][nY].isBomb
+                    ) {
+                        sum++;
+                    }
+                }
+            }
+            bombsMatrix[row][col].neighboors = sum;
+        })
+    );
+
+    return bombsMatrix;
+};
+
 Minefield.prototype.getBombsNeighboorsMatrix = function() {
     const neighboors = [];
     this.matrix.map((row, rIdx) => {
@@ -39,20 +85,21 @@ Minefield.prototype.getBombsNeighboorsMatrix = function() {
     this.matrix.map((rArr, row) =>
         rArr.map((cArr, col) => {
             let sum = 0;
-            const topLeft = row > 0 && col > 0 ? this.matrix[row - 1][col - 1] : 0;
-            const top = row > 0 ? this.matrix[row - 1][col] : 0;
-            const topRight =
-                row > 0 && col < this.matrix[row].length - 1 ? this.matrix[row - 1][col + 1] : 0;
-            const left = col > 0 ? this.matrix[row][col - 1] : 0;
-            const right = col < this.matrix[row].length - 1 ? this.matrix[row][col + 1] : 0;
-            const bottomLeft =
-                row < this.matrix.length - 1 && col > 0 ? this.matrix[row + 1][col - 1] : 0;
-            const bottom = row < this.matrix.length - 1 ? this.matrix[row + 1][col] : 0;
-            const bottomRight =
-                row < this.matrix.length - 1 && col < this.matrix[row].length - 1
-                    ? this.matrix[row + 1][col + 1]
-                    : 0;
-            sum = topLeft + top + topRight + left + right + bottomLeft + bottom + bottomRight;
+            for (let x = -1; x <= 1; x++) {
+                for (let y = -1; y <= 1; y++) {
+                    const nX = row + x;
+                    const nY = col + y;
+                    if (
+                        nX > 0 &&
+                        nX < row.length &&
+                        nY > 0 &&
+                        nY < matrix.length &&
+                        !(x === 0 && y === 0)
+                    ) {
+                        sum += this.matrix[nX][nY];
+                    }
+                }
+            }
             neighboors[row][col] = sum;
         })
     );
@@ -114,4 +161,4 @@ Minefield.prototype.openAll = function() {
     }
 };
 
-const game = new Minefield('game', 10, 10, 33);
+const game = new Minefield('game', 5, 5, 10);
