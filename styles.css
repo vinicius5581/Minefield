@@ -1,0 +1,33 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid black;
+}
+
+.wrapper > div {
+    display: flex;
+    flex-grow: 1;
+}
+
+.wrapper > div > div {
+    border: 1px solid black;
+    flex-grow: 1;
+}
+
+.cel {
+    height: 20px;
+    width: 20px;
+    background: green;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 15px;
+}
+
+.open {
+    background: grey;
+}
+
+.bomb {
+    background: red;
+}
